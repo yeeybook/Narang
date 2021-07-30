@@ -34,7 +34,7 @@ export default {
     open: {
       type: Boolean,
       default: false
-    }
+    },
   },
 
   setup (props, { emit }) {
@@ -65,28 +65,34 @@ export default {
         createRoomForm.value.validate((valid) => {
           if (valid) {
             const password = state.form.secret ? state.form.password : 0
-            store.dispatch('root/requestCreateGameRoom', { title: state.form.name, password: password, maxPlayer: state.form.num})
+            const payload = {
+              title: state.form.name,
+              password: password,
+              maxPlayer: state.form.num
+            }
+
+            store.dispatch('root/requestCreateGameRoom', payload)
             .then(function (result) {
+              const roomId = result.data.roomId
+              store.commit('root/setRoomInfo', result.data.roomId)
               ElMessage({
                 message: '방생성 완료!',
                 type: 'success',
               })
               handleClose()
 
-              store.dispatch('root/requestEnterGameRoom', { roomId: result.data.roomId, password: password })
+              store.dispatch('root/requestEnterGameRoom', { roomId, password })
               .then(function (result) {
                 router.push({
                   name: 'gameRoom',
                   params: {
-                    roomId: props.roomId
+                    roomId,
                   }
                 })
               })
               .catch(function (err) {
                 ElMessage.error(err.response.data.message)
               })
-
-
             })
             .catch(function (err) {
               ElMessage.error('방생성 실패')

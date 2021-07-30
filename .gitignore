@@ -81,7 +81,9 @@ bin/
 
 ### IntelliJ IDEA ###
 .idea
-.properties
+*.properties
+application.properties
+*.gz
 *.iws
 *.iml
 *.ipr
