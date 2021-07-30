@@ -22,6 +22,7 @@
         </div>
       </div>
     </div>
+    <a @click="goOpenviduTest">openvidu test</a>
   </div>
 </template>
 
@@ -54,7 +55,13 @@ export default {
       isLoggedIn: computed(() => store.getters['root/isLoggedIn']),
     })
 
-    return { state }
+    const goOpenviduTest = () => {
+      router.push({
+        name: 'goOpenvidu'
+      })
+    }
+
+    return { state, goOpenviduTest }
   }
 
 }

@@ -3,7 +3,7 @@ import home from '@/views/home/home'
 import waitingRoom from '@/views/waiting-room/waiting-room'
 import gameRoom from '@/views/game-room/game-room'
 import Mypage from '@/views/mypage/mypage'
-
+import openvidu from '@/views/openvidu/openvidu'
 
 function makeRoutesFromMenu() {
   let routes = []
@@ -28,6 +28,11 @@ function makeRoutesFromMenu() {
     path: '/game-room/:roomId',
     name: 'gameRoom',
     component: gameRoom
+  },
+  {
+    path: '/openvidu',
+    name: 'goOpenvidu',
+    component: openvidu
   },
   )
   return routes

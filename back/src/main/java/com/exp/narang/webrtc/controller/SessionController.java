@@ -1,6 +1,6 @@
 package com.exp.narang.webrtc.controller;
 
-import com.exp.narang.common.auth.UserDetails;
+import com.exp.narang.api.service.UserService;
 import com.exp.narang.common.model.response.BaseResponseBody;
 import com.exp.narang.db.entity.User;
 import com.exp.narang.webrtc.response.SessionTokenRes;
@@ -9,6 +9,7 @@ import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,7 +22,8 @@ import java.util.concurrent.ConcurrentHashMap;
 @RestController
 @RequestMapping("/api/v1/sessions")
 public class SessionController {
-
+    @Autowired
+    private UserService userService;
     private OpenVidu openVidu;
 
     //         방이름(5팀만) , 세션
@@ -47,15 +49,15 @@ public class SessionController {
             @ApiResponse(code = 404, message = "잘못된 요청"),
             @ApiResponse(code = 500, message = "서버 오류")
     })
-    public ResponseEntity<? extends BaseResponseBody> getToken(@ApiIgnore Authentication authentication,
+    public ResponseEntity<? extends BaseResponseBody> getToken(
                                                                @PathVariable(name = "roomId") @ApiParam(value="세션(방) 이름", required = true) Long roomId){
         // 토큰 없이 요청하면 인증 실패
-        if(authentication == null)
-            return ResponseEntity.status(401).body(BaseResponseBody.of(401, "인증 실패"));
-
-        UserDetails userDetails = (UserDetails)authentication.getDetails();
-        User user = userDetails.getUser();
-
+//        if(authentication == null)
+//            return ResponseEntity.status(401).body(BaseResponseBody.of(401, "인증 실패"));
+//
+//        UserDetails userDetails = (UserDetails)authentication.getDetails();
+//        User user = userDetails.getUser();
+        User user = userService.getUserByEmail("admin");
         // 참여자는 전부 실시간 영상 송신
         OpenViduRole role = OpenViduRole.PUBLISHER;
         String serverData = "{\"serverData\": \"" + user.getEmail() + "\"}";
@@ -71,7 +73,6 @@ public class SessionController {
                 // 새로운 세션 생성
                 Session session = this.openVidu.createSession();
                 token = session.createConnection(connectionProperties).getToken();
-
                 // 생성한 사용자 토큰과 역할 저장
                 this.mapSessions.put(roomId, session);
                 this.mapSessionTitlesTokens.put(roomId, new ConcurrentHashMap<>());
@@ -88,7 +89,7 @@ public class SessionController {
                 return ResponseEntity.status(404).body(BaseResponseBody.of(404, "잘못된 요청"));
             }
         }
-        return ResponseEntity.status(200).body(SessionTokenRes.of(200, "성공", token));
+        return ResponseEntity.status(200).body(SessionTokenRes.of(200, "성공", token, mapSessions.get(roomId), mapSessionTitlesTokens.get(roomId)));
     }
 
     // 방 나갈 때 호출
@@ -116,7 +117,7 @@ public class SessionController {
                     // 세션 삭제
                     this.mapSessions.remove(roomId);
                 }
-                return ResponseEntity.status(200).body(SessionTokenRes.of(200, "성공", token));
+                return ResponseEntity.status(200).body(SessionTokenRes.of(200, "성공", token, mapSessions.get(roomId), mapSessionTitlesTokens.get(roomId)));
             } else {
                 // 토큰이 유효하지 않음
                 return ResponseEntity.status(404).body(BaseResponseBody.of(404, "잘못된 요청"));
