@@ -2,11 +2,11 @@
   <article class="game-room-container">
     <section class="game-cam-chat-container">
       <GameRoomWebcam/>
-      <GameRoomChat/>
+      <GameRoomChat :roomId="route.params.roomId" :userList="state.userList"/>
     </section>
-    <GameRoomSetting @openDialog="openDialog"/>
+    <GameRoomSetting :roomId="route.params.roomId" @openDialog="openDialog"/>
   </article>
-  <GameRoomInfoChangeDialog @closeDialog="closeDialog" :open="state.open"/>
+  <GameRoomInfoChangeDialog @closeDialog="closeDialog" :open="state.open" :roomId="route.params.roomId"/>
 
 </template>
 <style scoped>
@@ -17,7 +17,10 @@ import GameRoomInfoChangeDialog from './game-room-setting/game-room-info-change-
 import GameRoomChat from './game-room-chat/game-room-chat.vue'
 import GameRoomSetting from './game-room-setting/game-room-setting.vue'
 import GameRoomWebcam from './game-room-webcam/game-room-webcam.vue'
+import { ElMessage } from 'element-plus'
 import { reactive } from '@vue/reactivity'
+import { useStore } from 'vuex'
+import { useRoute } from 'vue-router'
 export default {
   name: "gameRoom",
   components: {
@@ -27,8 +30,12 @@ export default {
     GameRoomInfoChangeDialog,
   },
   setup(props, { emit }) {
+    const store = useStore()
+    const route = useRoute()
     const state = reactive({
-      open: false
+      open: false,
+      userList: [],
+      room: {},
     })
 
     const openDialog = () => {
@@ -39,7 +46,47 @@ export default {
       state.open = false
     }
 
-    return { state, openDialog, closeDialog }
+    const requestRoomInfo = () => {
+      store.dispatch('root/requestReadSingleGameRoom', route.params.roomId)
+        .then(res => {
+          store.commit('root/setRoomInfo', res.data.room)
+          state.room = res.data.room
+        })
+        .catch(err => {
+          console.log(err)
+          ElMessage({
+            type: 'error',
+            message: '문제가 발생했습니다.'
+          })
+        })
+    }
+
+    const requestMyInfo = () => {
+      store.dispatch('root/requestReadMyInfo')
+        .then(res => {
+          store.commit('root/setUserInfo', res.data.user)
+        })
+        .catch(err => {
+          ElMessage(err)
+        })
+    }
+
+    const requestUserList = () => {
+      store.dispatch('root/requestReadUserList', route.params.roomId)
+        .then(res => {
+          console.log(res.data.userList)
+          state.userList = res.data.userList
+        })
+        .catch(err => {
+          ElMessage(err)
+        })
+    }
+
+    requestRoomInfo()
+    requestMyInfo()
+    requestUserList()
+
+    return { state, openDialog, closeDialog, requestRoomInfo, route }
   }
 }
 </script>

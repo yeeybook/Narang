@@ -4,7 +4,7 @@
       <h1>Narang Lobby</h1>
       <div class="nav-bottom">
         <div class="search-group">
-          <el-radio-group v-model="state.isActivate" size="small">
+          <el-radio-group v-model="state.isActivate" size="small" @click="ClickSearch">
             <el-radio-button label="All"></el-radio-button>
             <el-radio-button label="Waiting"></el-radio-button>
             <el-radio-button label="Playing"></el-radio-button>
@@ -28,15 +28,15 @@
             icon="el-icon-search"
             type="primary"
             circle
-            @click="ClickReadGameRoomList">
+            @click="ClickSearch">
           </el-button>
         </div>
         <el-button type="primary" round @click="clickCreateRoom">방만들기</el-button>
       </div>
     </div>
     <ul class="infinite-list" v-infinite-scroll="load" style="overflow:auto; height: 70vh">
-      <li v-for="room in state.gameRoomList" @click="clickConference(room)" class="infinite-list-item" :key="room.roomId" >
-        <room :room='room'/>
+      <li v-for="room in state.gameRoomList" @click="clickConference(room.room)" class="infinite-list-item" :key="room.roomId" >
+        <room :room='room.room' :user="room.joinUsers"/>
       </li>
     </ul>
   </div>
@@ -140,7 +140,6 @@ export default {
 
     const state = reactive({
       gameRoomList: [],
-      count: 12,
       activateList: {All: null, Waiting: true, Playing: false},
       isActivate: ref('All'),
       options:
@@ -162,7 +161,16 @@ export default {
     })
 
     const load = function () {
-      ClickReadGameRoomList()
+      if (!state.end) {
+        readGameRoomList()
+      }
+    }
+
+    const ClickSearch = function () {
+      state.page = 1
+      state.end = false
+      state.gameRoomList = []
+      readGameRoomList()
     }
 
     const clickConference = function (room) {
@@ -177,7 +185,7 @@ export default {
       if (room.password == 0) {
         store.dispatch('root/requestEnterGameRoom', {roomId: room.roomId, password: 0})
         .then(res => {
-          console.log(res)
+          store.commit('root/setRoomInfo', room)
           router.push({
             name: 'gameRoom',
             params: {
@@ -189,18 +197,15 @@ export default {
           console.log(err)
         })
       } else {
-        emit('openEnterSecretRoomDialog', room.roomId)
+        emit('openEnterSecretRoomDialog', room)
       }
-
-
     }
 
     const clickCreateRoom = function() {
       emit('openCreateRoomDialog')
     }
 
-    const ClickReadGameRoomList = function() {
-
+    const readGameRoomList = function() {
       if (state.end) {
         return
       }
@@ -210,7 +215,7 @@ export default {
         isActivate: state.activateList[state.isActivate],
         title: state.input ? state.input : null,
         page: state.page,
-        size: 9,
+        size: 16,
       }
       store.dispatch('root/requestReadGameRoomList', payload)
       .then(function (result) {
@@ -224,7 +229,7 @@ export default {
       })
     }
 
-    return { state, load, clickConference, clickCreateRoom, ClickReadGameRoomList }
+    return { state, load, clickConference, clickCreateRoom, readGameRoomList, ClickSearch }
   }
 }
 </script>
