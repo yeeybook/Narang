@@ -4,8 +4,11 @@ const email = localStorage.getItem('email') ? localStorage.getItem('email') : ''
 const mypageSeletedMenu = 'userInfoChange'
 const username = ''
 const profileImageURL = ''
+const userId = ''
 const myRoom = {}
-
+const publisher = {}
+const onVideo = true;
+const onAudio = true;
 /**
  * 플랫폼 관련 정보로 데스크탑인지, 모바일인지 판별 - 하이브리드 앱 대비
  */
@@ -42,4 +45,7 @@ export default {
   username,
   profileImageURL: profileImageURL,
   myRoom,
+  userId,
+  onVideo,
+  onAudio
 }

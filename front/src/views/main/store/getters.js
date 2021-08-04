@@ -33,3 +33,15 @@ export function profileImageURL (state) {
 export function myRoom (state) {
   return state.myRoom
 }
+
+export function publisher (state) {
+  return state.publisher
+}
+
+export function onVideo (state) {
+  return state.onVideo
+}
+
+export function onAudio (state) {
+  return state.onAudio
+}
