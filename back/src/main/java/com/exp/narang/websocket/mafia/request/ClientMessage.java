@@ -1,8 +1,5 @@
 package com.exp.narang.websocket.mafia.request;
 
-/**
- * Created by Jbee on 2017. 3. 28..
- */
 public class ClientMessage {
     private String userName;
     private String content;

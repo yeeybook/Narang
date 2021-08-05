@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.*;
 @Getter
@@ -52,15 +53,16 @@ public class GamePlayers {
 //        return this.players;
 //    }
 //
-//    public Player getPlayer(String userName) {
-//        for (Player player : this.players) {
-//            if (player.isSameNickName(userName)) {
-//                return player;
-//            }
-//        }
-//        return null;
-//    }
-//
+    // username에 해당하는 player를 리턴한다.
+    public Player getPlayer(String username) {
+        for (Player player : this.players) {
+            if (player.getUser().getUsername().equals(username)) {
+                return player;
+            }
+        }
+        return null;
+    }
+
 //    public void removeDeadPlayer(Player player) {
 //        this.players.remove(player);
 //    }

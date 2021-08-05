@@ -33,7 +33,7 @@ public class MafiaController {
     private static Map<Long, GameManager> gameManagerMap;
 
     @Autowired
-    private RoomService roomService;
+    RoomService roomService;
 
     @PostConstruct
     public void init() {
@@ -44,7 +44,7 @@ public class MafiaController {
     @MessageMapping("/mafia/start/{roomId}")
     @SendTo("/from/mafia/start/{roomId}")
     public void broadcasting(@DestinationVariable long roomId) throws Exception {
-        gameManagerMap.put(roomId, new GameManager(roomId));
+        gameManagerMap.put(roomId, new GameManager(roomId, roomService));
     }
 
     // 역할 확인하기 버튼을 누르면 roomId, username 파라미터를 통하여 각자 역할을 확인한다.
@@ -65,13 +65,13 @@ public class MafiaController {
 //        return gameRoom.getUserRoleNameInGame(investMessage.getTheVoted());
 //    }
 //
-//    @MessageMapping("/vote/{roomId}")
-//    @SendTo("/from/vote/{roomId}")
-//    public GameResult broadcasting(VoteMessage voteMessage, @DestinationVariable long roomId) throws Exception {
-//    	log.debug("voteMessage arrived: /vote/{}, voteMessage: {}", roomId, voteMessage);
-//        Room gameRoom = lobby.getRoom(roomId);
-//        return gameRoom.returnVoteResult(voteMessage);
-//    }
+
+    @MessageMapping("/vote/{roomId}")
+    @SendTo("/from/vote/{roomId}/{username}")
+    public GameResult broadcasting(VoteMessage voteMessage, @DestinationVariable long roomId) throws Exception {
+    	log.debug("voteMessage arrived: /vote/{}, voteMessage: {}", roomId, voteMessage);
+        return gameManagerMap.get(roomId).returnVoteResult(voteMessage);
+    }
 //
 //
 //    private final SimpMessagingTemplate template;

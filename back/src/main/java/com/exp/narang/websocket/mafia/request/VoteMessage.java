@@ -1,46 +1,26 @@
 package com.exp.narang.websocket.mafia.request;
 
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
 public class VoteMessage {
-    private String userName;
+    private String username;
     private String theVoted;
     private String stage;
 
-    public VoteMessage() {
-    }
+    public VoteMessage() { }
 
-    public VoteMessage(String userName, String theVoted) {
-        this.userName = userName;
+    public VoteMessage(String username, String theVoted) {
+        this.username = username;
         this.theVoted = theVoted;
-    }
-
-    public String getUserName() {
-        return userName;
-    }
-
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
-
-    public String getTheVoted() {
-        return theVoted;
-    }
-
-    public void setTheVoted(String theVoted) {
-        this.theVoted = theVoted;
-    }
-
-    public String getStage() {
-        return stage;
-    }
-
-    public void setStage(String stage) {
-        this.stage = stage;
     }
 
     @Override
     public String toString() {
         return "VoteMessage{" +
-            "userName='" + userName + '\'' +
+            "username='" + username + '\'' +
             ", theVoted='" + theVoted + '\'' +
             ", stage='" + stage + '\'' +
             '}';

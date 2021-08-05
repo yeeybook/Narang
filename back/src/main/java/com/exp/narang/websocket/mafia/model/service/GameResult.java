@@ -1,5 +1,7 @@
 package com.exp.narang.websocket.mafia.model.service;
 
+import org.springframework.stereotype.Component;
+
 public class GameResult {
     private static final String MAFIA_WIN_MESSAGE = "마피아가 승리하였습니다.";
     private static final String CITIZEN_WIN_MESSAGE = "시민이 승리하였습니다.";

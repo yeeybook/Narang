@@ -1,19 +1,24 @@
 package com.exp.narang.websocket.mafia.model.manager;
 
+import com.exp.narang.websocket.mafia.model.Player;
 import com.exp.narang.websocket.mafia.model.service.GamePlayers;
 import com.exp.narang.websocket.mafia.model.service.GameResult;
 import com.exp.narang.websocket.mafia.model.service.GameResultType;
 
+import com.exp.narang.websocket.mafia.request.VoteMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.stereotype.Component;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import static org.kurento.jsonrpc.client.JsonRpcClient.log;
+//@Component
 public class VoteManager {
 //    private static final Logger log = LoggerFactory.getLogger(VoteManager.class);
 //
-//    private Map<Player, Player> voteStatus;
+//    private Map<Player, Player> voteStatus; // 투표자 : 투표 대상
 //    private GamePlayers players;
 //
 //    public VoteManager(GamePlayers players) {
@@ -23,7 +28,7 @@ public class VoteManager {
 //
 //    public boolean handleVote(VoteMessage voteMessage) {
 //        log.debug("handleVote: {}", voteMessage);
-//        Player playerVoting = this.players.getPlayer(voteMessage.getUserName());
+//        Player playerVoting = this.players.getPlayer(voteMessage.getUsername());
 //        Player playerVoted = this.players.getPlayer(voteMessage.getTheVoted());
 //
 //        if (playerVoting == null) {
@@ -31,7 +36,6 @@ public class VoteManager {
 //        }
 //
 //        voteStatus.put(playerVoting, playerVoted);
-//        //TODO Below code is TEST CODE, DELETE or COMMENT this code before commit.
 ////        if (this.players.getPlayer("testUser1") != null) {
 ////            this.voteStatus.put(this.players.getPlayer("testUser1"), this.players.getPlayer("testUser1"));
 ////        }
@@ -59,13 +63,13 @@ public class VoteManager {
 //
 //    public GameResult returnGameResult(String stage) {
 //        log.debug("returnGameResult:stage: {}", stage);
-//        String selectedUserNickName;
+//        String selectedUsername;
 //        if (stage.equals("day")) {
-//            selectedUserNickName = determineResultOfDay(countVoteOfDay());
-//            log.debug("returnGameResult:Day logic:selectedUserNickName: {}", selectedUserNickName);
+//            selectedUsername = determineResultOfDay(countVoteOfDay());
+//            log.debug("returnGameResult:Day logic:selectedUserNickName: {}", selectedUsername);
 //        } else {
-//            selectedUserNickName = determineResultOfNight(countVoteOfMafia(), countVoteOfDoctor());
-//            log.debug("returnGameResult:Night logic:selectedUserNickName: {}", selectedUserNickName);
+//            selectedUsername = determineResultOfNight(countVoteOfMafia(), countVoteOfDoctor());
+//            log.debug("returnGameResult:Night logic:selectedUserNickName: {}", selectedUsername);
 //        }
 //        GameResultType gameResultType = this.players.judgementPlayersCount();
 //        switch (gameResultType) {
@@ -76,8 +80,8 @@ public class VoteManager {
 //                log.debug("시민이 승리하였습니다.");
 //                return GameResult.returnCitizenWin();
 //            case KEEP_GOING:
-//                log.debug("KEEP_GOING::selectedUser: {}", selectedUserNickName);
-//                return GameResult.returnSelectedUser(selectedUserNickName);
+//                log.debug("KEEP_GOING::selectedUser: {}", selectedUsername);
+//                return GameResult.returnSelectedUser(selectedUsername);
 //            default:
 //                throw new RuntimeException("Unexpected Error!");
 //        }
@@ -111,22 +115,7 @@ public class VoteManager {
 //        return countStatusOfMafia;
 //    }
 //
-//    private Map<Player, Integer> countVoteOfDoctor() {
-//        Map<Player, Integer> countStatusOfDoctor = new HashMap<>();
-//        voteStatus.keySet().stream()
-//            .forEach(player -> countStatusOfDoctor.put(player, 0));
-//        voteStatus.keySet().stream()
-//            .filter(player -> player.isDoctor())
-//            .forEach(player -> {
-//                Player selectedPlayerByDoctor = voteStatus.get(player);
-//                if (selectedPlayerByDoctor != null) { //기권표를 걸러낸다.
-//                    countStatusOfDoctor.put(selectedPlayerByDoctor, countStatusOfDoctor.get(selectedPlayerByDoctor) + 1);
-//                }
-//            });
-//        log.debug("countVoteOfDoctor:countStatusOfDoctor: {}", countStatusOfDoctor);
-//        return countStatusOfDoctor;
-//    }
-//
+//    // 투표된 username 반환
 //    private String determineResultOfDay(Map<Player, Integer> countStatus) {
 //        Player selectedPlayer = null;
 //        int base = 0;
@@ -146,7 +135,7 @@ public class VoteManager {
 //            log.debug("determineResultOfDay:selectPlayer: {}, \n1. {}가 플레이어에서 제외되었습니다.", selectedPlayer, selectedPlayer);
 //            voteStatus.clear();
 //            log.debug("투표 현황을 초기화합니다. determineResultOfDay::voteStatus: {}", voteStatus);
-//            return selectedPlayer.getUser().getNickname();
+//            return selectedPlayer.getUser().getUsername();
 //        }
 //        log.debug("determineResultOfDay:동률이거나 모두가 투표를 하지 않아 아무도 죽지 않았습니다. \n");
 //        voteStatus.clear(); //투표가 종료된 뒤 voteStatus 초기화

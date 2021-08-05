@@ -3,6 +3,7 @@ package com.exp.narang.websocket.mafia.model.manager;
 import com.exp.narang.websocket.mafia.model.assignRoles.*;
 import com.exp.narang.websocket.mafia.model.role.Role;
 import com.exp.narang.websocket.mafia.model.service.GamePlayers;
+import org.springframework.stereotype.Component;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -10,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 // 참가자의 역할을 분배한다.
+//@Component
 public class RoleManager {
     private static Map<Integer, AssignRole> mappings = new HashMap<>();
 
@@ -25,7 +27,7 @@ public class RoleManager {
 
     // 마피아, 시민 수에 맞게 역할 분담을 한다.
     public static List<Role> assignRoleToPlayers(GamePlayers players) {
-        AssignRole ar = mappings.get(players.countOfPlayers());
+        AssignRole ar = mappings.get(4);
         List<Role> roles = ar.makeRole();
 
         // 섞어
