@@ -36,15 +36,9 @@ public class UserServiceImpl implements UserService {
 	private static final OkHttpClient httpClient;
 	private static final String KEY = "d3e0947404ef9c6533664b5c536be532";
 
-//	public UserServiceImpl(UserRepository userRepository, UserRepositorySupport userRepositorySupport,
-//						   PasswordEncoder passwordEncoder){
-//		this.userRepository = userRepository;
-//		this.userRepositorySupport = userRepositorySupport;
-//		this.passwordEncoder = passwordEncoder;
 	static{
 		httpClient = new OkHttpClient();
 	}
-//	}
 
 	@Override
 	public User createUser(UserRegisterPostReq userRegisterInfo) {
@@ -97,24 +91,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public User updateUser(UserInfoUpdateReq updateInfo, User user) {
-		String upload_path = "D:/images/profile/";
-		//profileImage 설정
 		if(updateInfo.getFile() != null) {
-//			try {
-//				if (user.getThumbnailUrl() != null) {
-//					File file = new File(upload_path + user.getUserId() + ".jpg");
-//					file.delete();
-//				}
-//				updateInfo.getFile().transferTo(new File(upload_path + user.getUserId() + ".jpg"));
-//				user.setThumbnailUrl("/images/profile/" + user.getUserId() + ".jpg");
-//			} catch (Exception e) {
-//				e.printStackTrace();
-//			}
-			try {
-				requestUpload(updateInfo.getFile(), user);
-			}catch (IOException e){
-				e.printStackTrace();
-			}
+			requestUpload(updateInfo.getFile(), user);
 		}
 		if(updateInfo.getUsername() != null) {
 			user.setUsername(updateInfo.getUsername());
@@ -125,38 +103,43 @@ public class UserServiceImpl implements UserService {
 		return userRepository.save(user);
 	}
 
-	private void requestUpload(MultipartFile mFile, User user) throws IOException {
+	private void requestUpload(MultipartFile mFile, User user)  {
 		log.debug("받은 파일명 : " + mFile.getOriginalFilename());
+		try {
+			RequestBody requestBody = new MultipartBody.Builder()
+					.setType(MultipartBody.FORM)
+					.addFormDataPart("key", KEY)
+					.addFormDataPart("image", mFile.getOriginalFilename(), RequestBody.create(MediaType.parse(""), mFile.getBytes()))
+					.build();
 
-		RequestBody requestBody = new MultipartBody.Builder()
-				.setType(MultipartBody.FORM)
-				.addFormDataPart("key", KEY)
-				.addFormDataPart("image", mFile.getOriginalFilename(), RequestBody.create(MediaType.parse(""), mFile.getBytes()))
-				.build();
+			Request request = new Request.Builder()
+					.url("https://api.imgbb.com/1/upload")
+					.post(requestBody)
+					.build();
 
-		Request request = new Request.Builder()
-				.url("https://api.imgbb.com/1/upload")
-				.post(requestBody)
-				.build();
-
-		httpClient.newCall(request).enqueue(new Callback() {
-			@Override
-			public void onFailure(@NotNull Call call, @NotNull IOException e) {
-				e.printStackTrace();
-				log.debug("실패");
-			}
-
-			@Override
-			public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
-				ImgbbResponse imgbbResponse = new Gson().fromJson(response.body().string(), ImgbbResponse.class);
-				ImgbbResponseData data = imgbbResponse.getData();
-				if(imgbbResponse.isSuccess()){
-					user.setThumbnailUrl(data.getUrl());
-					log.debug("업로드한 이미지 url" + data.getUrl());
-					log.debug("deleteUrl" + data.getDeleteUrl());
-					userRepository.save(user);
+			httpClient.newCall(request).enqueue(new Callback() {
+				@Override
+				public void onFailure(@NotNull Call call, @NotNull IOException e) {
+					e.printStackTrace();
+					log.debug("실패");
 				}
-			}
-		});
+
+				@Override
+				public void onResponse(@NotNull Call call, @NotNull Response response) throws IOException {
+					ImgbbResponse imgbbResponse = new Gson().fromJson(response.body().string(), ImgbbResponse.class);
+					ImgbbResponseData data = imgbbResponse.getData();
+					if(imgbbResponse.isSuccess()){
+						user.setThumbnailUrl(data.getUrl());
+						log.debug("업로드한 이미지 url" + data.getUrl());
+						log.debug("deleteUrl" + data.getDeleteUrl());
+						userRepository.save(user);
+					}
+				}
+			});
+		}catch (IOException e){
+			e.printStackTrace();
+		}
+
+
 	}
 }
