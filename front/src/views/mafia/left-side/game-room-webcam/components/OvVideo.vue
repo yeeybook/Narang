@@ -1,19 +1,13 @@
 <template>
   <video
-    :id="username"
     ref="myWebCam"
     @mouseover="showVideoMenu"
     :class="{'webcam': true, 'selected-border': isSelected, 'died-user': isDead}"
     autoplay
     playsinline
     controls="false"/>
-  <div v-if="state.mafiaManager.isLierItemActivate" class="video-overlay">
-    <i @click="startExpressDetection" class="menu-button el-icon-search"></i>
-  </div>
-  <div v-if="state.show" class="lie-detection">
-    <span v-if="state.lie" class="lie">거짓말!</span>
-    <span v-else class="true">진실.</span>
-  </div>
+  <canvas width="620" height="320" class="canvas" ref="myCanvas"></canvas>
+  <button @click="startExpressDetection" class="button-z">인식 시작</button>
 </template>
 
 <script>
@@ -33,6 +27,8 @@ export default {
   setup(props, {emit}) {
     const store = useStore()
     const myWebCam = ref(null)
+    const myCanvas = ref(null)
+    let ctx
 
     const state = reactive({
       detections: null,
@@ -42,15 +38,6 @@ export default {
       hide: false,
       lie: false,
       timerId: 0,
-      emotions: {
-        angry: 0,
-        disgusted: 0,
-        fearful: 0,
-        happy: 0,
-        neutral: 0,
-        sad: 0,
-        surprised: 0,
-      },
       mafiaManager: computed(() => store.getters['root/mafiaManager']),
     })
 
@@ -58,70 +45,34 @@ export default {
       store.state.root.mafiaManager.lierItem = false
       store.state.root.mafiaManager.isLierItemActivate = false
 
-      ElMessage({
-        type: 'success',
-        message: '거짓말 탐지기가 작동 중입니다.'
-      })
+      const displaySize = { width: myWebCam.value.videoWidth, height: myWebCam.value.videoHeight }
+      faceapi.matchDimensions(myCanvas.value, displaySize)
 
       state.timerId = setInterval(async () => {
+        ctx.clearRect(0, 0, 620, 320)
         state.detections = await faceapi.detectSingleFace(myWebCam.value, new faceapi.TinyFaceDetectorOptions())
+          .withFaceLandmarks()
           .withFaceExpressions()
+        console.log(state.detections)
+        const resizedDetections = faceapi.resizeResults(state.detections, displaySize)
+        faceapi.draw.drawFaceLandmarks(myCanvas.value, resizedDetections)
 
-        if (state.detections) {
-          let maxVal = 0
-          let maxEmotion = ''
-          for (let emotion in state.detections.expressions) {
-            if (state.detections.expressions[emotion] > maxVal) {
-              maxVal = state.detections.expressions[emotion]
-              maxEmotion = emotion
-            }
-          }
-          state.emotions[maxEmotion]++
-        }
-
-
-      }, 250)
+      }, 700)
 
       setTimeout(() => {
-        let emotionNum = 0
-        state.lie = false
-        for (let emotion in state.emotions) {
-          if (state.emotions[emotion]) emotionNum++
-        }
-
-        state.emotions = {
-          angry: 0,
-          disgusted: 0,
-          fearful: 0,
-          happy: 0,
-          neutral: 0,
-          sad: 0,
-          surprised: 0,
-        }
-
-        if (emotionNum >= 3) state.lie = true
-
-        state.show = true
-        console.log('끝내자')
         clearInterval(state.timerId)
-      }, 5000)
+      }, 500000)
     }
 
     onMounted(async () => {
+      ctx = myCanvas.value.getContext('2d')
       props.streamManager.addVideoElement(myWebCam.value)
       await faceapi.nets.tinyFaceDetector.load('/static/models')
       await faceapi.nets.faceExpressionNet.load('/static/models')
+      await faceapi.nets.faceLandmark68Net.load('/static/models')
     })
 
-    watch(() => state.show, () => {
-      if (state.show) {
-        setTimeout(() => {
-          state.show = false
-        }, 3000)
-      }
-    })
-
-    return { state, myWebCam, startExpressDetection }
+    return { state, myWebCam, myCanvas, startExpressDetection }
   }
 }
 </script>

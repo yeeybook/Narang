@@ -1,8 +1,9 @@
 .webcam {
+  left: 0%;
   border-radius: 20px;
-  position: relative;
   width: 100%;
   max-width: 600px;
+  z-index: 0;
 }
 
 .video-overlay {
@@ -80,4 +81,17 @@
   font-size: 30px;
   font-weight: bold;
   font-family: 'SpoqaHanSansNeo', sans-serif;
+}
+
+.canvas {
+  left: 0%;
+  position: absolute;
+  width: 600px;
+  height: 320px;
+  background-color: rgba(255, 255, 255, 0.1);
+  z-index: 10;
+}
+
+.button-z {
+  z-index: 15;
 }

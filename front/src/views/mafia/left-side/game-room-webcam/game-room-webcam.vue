@@ -47,8 +47,8 @@ export default {
   },
 
   setup(props, { emit }) {
-    const OPENVIDU_SERVER_URL = "https://" + location.hostname + ":8443"
-    const OPENVIDU_SERVER_SECRET = "NARANG_VIDU"
+    const OPENVIDU_SERVER_URL = "https://" + location.hostname + ":4443"
+    const OPENVIDU_SERVER_SECRET = "MY_SECRET"
     const store = useStore()
 
     const state = reactive({
@@ -108,7 +108,7 @@ export default {
 							resolution: '600x320',  // The resolution of your video
 							frameRate: 30,			// The frame rate of your video
 							insertMode: 'APPEND',	// How the video is inserted in the target element 'video-container'
-							mirror: true,       	// Whether to mirror your local video or not
+							mirror: false,       	// Whether to mirror your local video or not
 						})
 
 						state.mainStreamManager = publisher
